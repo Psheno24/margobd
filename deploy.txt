@@ -1,0 +1,3 @@
+# Настройки деплоя (опционально).
+# После merge в main и включения GitHub Pages сайт будет здесь:
+# https://psheno24.github.io/margobd/
