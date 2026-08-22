@@ -32,19 +32,12 @@
   let suppressAbort = false;
   let judgedFinals = 0;
 
-  document.querySelectorAll("[data-pet]").forEach((img) => {
-    const markReady = () => img.classList.add("is-ready");
-    img.addEventListener("load", markReady);
-    img.addEventListener("error", () => {
-      const fallback = img.getAttribute("data-fallback");
-      if (fallback && img.getAttribute("src") !== fallback) {
-        img.src = fallback;
-        return;
-      }
-      img.classList.add("hidden");
-    });
-    if (img.complete && img.naturalWidth > 0) markReady();
-  });
+  function mascotsHtml() {
+    return `<div class="mascots" aria-hidden="true">
+      <img class="mascot mascot-flower" src="assets/tsvetochka.webp" alt="" />
+      <img class="mascot mascot-bee" src="assets/shmelechka.webp" alt="" />
+    </div>`;
+  }
 
   function normalize(text) {
     return String(text || "")
@@ -150,6 +143,7 @@
       if (state.hardcoreReady) {
         app.innerHTML = `
           <section class="screen is-on">
+            ${mascotsHtml()}
             <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
             <h1 class="brand">${escapeHtml(Q.herName)}</h1>
             <div class="rule"></div>
@@ -163,6 +157,7 @@
 
       app.innerHTML = `
         <section class="screen is-on">
+          ${mascotsHtml()}
           <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
           <h1 class="brand">${escapeHtml(Q.herName)}</h1>
           <div class="rule"></div>
@@ -743,7 +738,7 @@
     const ctx = canvas.getContext("2d");
     const w = (canvas.width = window.innerWidth);
     const h = (canvas.height = window.innerHeight);
-    const colors = ["#e8a317", "#f4a6b8", "#fff8ef", "#6b9a6a", "#f6d27a"];
+    const colors = ["#f07828", "#ffd24a", "#6ec8e8", "#ff7a9a", "#3d9a45", "#1a1a1a"];
     const bits = Array.from({ length: 90 }, () => ({
       x: w * 0.5 + (Math.random() - 0.5) * 80,
       y: h * 0.22,

@@ -17,8 +17,8 @@ window.QUEST = {
   },
 
   pets: {
-    tsvetochka: "Тшветочка",
-    shmelechka: "Шмелёчка",
+    tsvetochka: { name: "Тшветочка", image: "assets/tsvetochka.webp" },
+    shmelechka: { name: "Шмелёчка", image: "assets/shmelechka.webp" },
   },
 
   difficulty: {
