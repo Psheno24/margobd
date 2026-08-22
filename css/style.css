@@ -267,17 +267,58 @@ textarea {
   text-transform: uppercase;
 }
 
+.panel {
+  width: min(100%, 420px);
+  padding: 22px 18px 20px;
+  background: rgba(255, 253, 248, 0.96);
+  color: var(--ink);
+  border: var(--line);
+  border-radius: 28px;
+  box-shadow: 6px 6px 0 #1a1a1a;
+  text-align: center;
+}
+
+.panel-wide {
+  width: min(100%, 460px);
+}
+
+.panel .kicker {
+  color: var(--petal-deep);
+}
+
+.panel .lede,
+.panel .riddle,
+.panel .heard,
+.panel .mic-label,
+.panel .flame-count,
+.panel .riddle-lead,
+.panel .diff-error,
+.panel .after,
+.panel .gift-lead {
+  color: var(--ink);
+}
+
+.panel .flame-count span,
+.panel .heard {
+  color: rgba(26, 26, 26, 0.62);
+}
+
+.panel .ghost,
+.panel .fallback summary {
+  color: rgba(26, 26, 26, 0.55);
+}
+
 .brand {
   margin: 0;
   font-family: "Baloo 2", "Nunito", sans-serif;
   font-weight: 800;
-  font-size: clamp(52px, 17vw, 92px);
+  font-size: clamp(48px, 15vw, 84px);
   line-height: 0.88;
   letter-spacing: -0.02em;
   color: var(--ink);
   text-shadow:
     3px 3px 0 #fff,
-    6px 6px 0 rgba(26, 26, 26, 0.15);
+    6px 6px 0 rgba(26, 26, 26, 0.12);
 }
 
 .display {
@@ -429,7 +470,6 @@ textarea {
   color: #8b0000;
   font-size: 16px;
   font-weight: 800;
-  text-shadow: 1px 1px 0 #fff;
 }
 
 .diff-error.is-shake {
@@ -877,9 +917,7 @@ textarea {
   margin-top: 12px;
 }
 
-.row input,
-.guestbook input,
-.guestbook textarea {
+.row input {
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -901,121 +939,60 @@ textarea {
   text-underline-offset: 3px;
 }
 
-.gift-card {
-  width: min(100%, 360px);
-  padding: 18px;
-  background: var(--paper);
-  color: var(--paper-ink);
-  border-radius: 24px;
-  border: var(--line);
-  box-shadow: 6px 6px 0 #1a1a1a;
+.gift-lead {
+  margin: 0 0 16px;
 }
 
-.gift-card img {
+.codes {
+  display: grid;
+  gap: 12px;
+}
+
+.code-card {
+  padding: 14px;
+  border: var(--line);
+  border-radius: 18px;
+  background: #fff8e8;
+  box-shadow: 3px 3px 0 #1a1a1a;
+  text-align: center;
+}
+
+.code-card h3 {
+  margin: 0 0 10px;
+  font-family: "Baloo 2", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--petal-deep);
+}
+
+.code-card img {
   display: block;
   width: 100%;
   height: auto;
   background: #fff;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 2px solid var(--ink);
 }
 
-.missing-qr {
+.missing-code {
   display: none;
-  padding: 36px 16px;
+  padding: 28px 12px;
   border: 2px dashed rgba(26, 26, 26, 0.35);
-  border-radius: 14px;
+  border-radius: 12px;
   color: #555;
   font-size: 14px;
   text-align: center;
 }
 
-.missing-qr.is-on {
+.missing-code.is-on {
   display: block;
 }
 
-.gift-card > p {
-  margin: 14px 0 0;
-  font-size: 15px;
-}
-
-.gift-card .after {
-  margin-top: 8px;
+.panel .after {
+  margin: 16px 0 0;
   font-family: "Baloo 2", sans-serif;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
-}
-
-.guestbook {
-  width: min(100%, 360px);
-  margin-top: 16px;
-  padding: 16px;
-  background: rgba(255, 253, 248, 0.92);
-  border: var(--line);
-  border-radius: 22px;
-  text-align: left;
-  box-shadow: 5px 5px 0 #1a1a1a;
-}
-
-.guestbook h3 {
-  margin: 0 0 6px;
-  font-family: "Baloo 2", sans-serif;
-  font-size: 22px;
-}
-
-.guestbook .hint {
-  margin: 0 0 14px;
-  color: rgba(26, 26, 26, 0.7);
-  font-size: 14px;
-}
-
-.guestbook label {
-  display: block;
-  margin: 0 0 6px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--petal-deep);
-}
-
-.guestbook .field + .field {
-  margin-top: 10px;
-}
-
-.guestbook textarea {
-  min-height: 88px;
-  resize: vertical;
-}
-
-.guestbook .btn {
-  margin-top: 14px;
-  width: 100%;
-}
-
-.guestbook-status {
-  min-height: 22px;
-  margin: 10px 0 0;
-  font-size: 14px;
-  color: var(--leaf-deep);
-}
-
-.guestbook-list {
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.guestbook-list li {
-  padding: 10px 0;
-  border-top: 2px solid rgba(26, 26, 26, 0.12);
-  font-size: 14px;
-}
-
-.guestbook-list strong {
-  display: block;
-  margin-bottom: 2px;
-  color: var(--petal-deep);
 }
 
 canvas.confetti {

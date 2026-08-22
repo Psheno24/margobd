@@ -2,24 +2,28 @@ window.QUEST = {
   herName: "Марго",
   hisName: "Серёжа",
   phrase: "Серёжа не гей",
-  qrImage: "assets/qr.png",
   dateLabel: "квест на день рождения",
-  giftCaption: "Покажи этот код — и забирай подарок.",
+  giftCaption: "Покажи код — и забирай подарок.",
   afterword: "С днём рождения. Ты справилась.",
-  guestbookTitle: "Оставь запись",
-  guestbookHint: "Пожелание, шутка или признание — уйдёт Серёже в Telegram.",
-  guestbookThanks: "Записано. Шмелёчка одобряет.",
-
-  // Заполни после создания бота у @BotFather
-  telegram: {
-    botToken: "",
-    chatId: "",
-  },
 
   pets: {
     tsvetochka: { name: "Тшветочка", image: "assets/tsvetochka.webp" },
     shmelechka: { name: "Шмелёчка", image: "assets/shmelechka.webp" },
   },
+
+  // Положи картинки кодов в assets (png/jpg/webp) — имена ниже
+  codes: [
+    {
+      title: "Озоновый слой",
+      image: "assets/code-ozone.png",
+      fileHint: "code-ozone.png",
+    },
+    {
+      title: "Дикие ягодки",
+      image: "assets/code-berries.png",
+      fileHint: "code-berries.png",
+    },
+  ],
 
   difficulty: {
     title: "Выбери сложность",
@@ -28,19 +32,16 @@ window.QUEST = {
       {
         id: "easy",
         label: "Лёгкая",
-        hint: "для пусек",
         reject: "выбери другой, ты же не пуська",
       },
       {
         id: "medium",
         label: "Средняя",
-        hint: "почти серьёзно",
         reject: "не расстраивай",
       },
       {
         id: "hard",
         label: "Сложная",
-        hint: "огонь",
         reject: "Подумай ещё раз",
       },
       {
