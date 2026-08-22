@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label=""H25B>G:0">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#dff7ea"/>
+      <stop offset="100%" stop-color="#7ec8a8"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#sky)"/>
+  <g transform="translate(100 108)">
+    <g fill="#f4a6b8">
+      <ellipse cx="0" cy="-34" rx="18" ry="28"/>
+      <ellipse cx="0" cy="34" rx="18" ry="28"/>
+      <ellipse cx="-34" cy="0" rx="28" ry="18"/>
+      <ellipse cx="34" cy="0" rx="28" ry="18"/>
+      <ellipse cx="-24" cy="-24" rx="22" ry="18" transform="rotate(-45)"/>
+      <ellipse cx="24" cy="-24" rx="22" ry="18" transform="rotate(45)"/>
+      <ellipse cx="-24" cy="24" rx="22" ry="18" transform="rotate(45)"/>
+      <ellipse cx="24" cy="24" rx="22" ry="18" transform="rotate(-45)"/>
+    </g>
+    <circle r="22" fill="#f6d27a"/>
+    <circle r="12" fill="#e8a317"/>
+    <circle cx="-7" cy="-4" r="2.4" fill="#1c2a20"/>
+    <circle cx="7" cy="-4" r="2.4" fill="#1c2a20"/>
+    <path d="M-6 6 Q0 12 6 6" fill="none" stroke="#1c2a20" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -3,9 +3,54 @@ window.QUEST = {
   hisName: "Серёжа",
   phrase: "Серёжа не гей",
   qrImage: "assets/qr.png",
-  dateLabel: "",
+  dateLabel: "квест на день рождения",
   giftCaption: "Покажи этот код — и забирай подарок.",
   afterword: "С днём рождения. Ты справилась.",
+  guestbookTitle: "Оставь запись",
+  guestbookHint: "Пожелание, шутка или признание — уйдёт Серёже в Telegram.",
+  guestbookThanks: "Записано. Шмелёчка одобряет.",
+
+  // Заполни после создания бота у @BotFather
+  telegram: {
+    botToken: "",
+    chatId: "",
+  },
+
+  pets: {
+    tsvetochka: "Тшветочка",
+    shmelechka: "Шмелёчка",
+  },
+
+  difficulty: {
+    title: "Выбери сложность",
+    lead: "Тшветочка и Шмелёчка уже наготове. Не подведи.",
+    options: [
+      {
+        id: "easy",
+        label: "Лёгкая",
+        hint: "для пусек",
+        reject: "выбери другой, ты же не пуська",
+      },
+      {
+        id: "medium",
+        label: "Средняя",
+        hint: "почти серьёзно",
+        reject: "не расстраивай",
+      },
+      {
+        id: "hard",
+        label: "Сложная",
+        hint: "огонь",
+        reject: "Подумай ещё раз",
+      },
+      {
+        id: "hardcore",
+        label: "ХАРДКОР",
+        hint: "только для Марго",
+        accept: "тут без разницы было, вопросы одинаковые кек",
+      },
+    ],
+  },
 
   questions: [
     {
