@@ -3,7 +3,6 @@
   const app = document.getElementById("app");
   const canvas = document.getElementById("confetti");
   const CANDLE_COUNT = 30;
-  const GUESTBOOK_KEY = "margo-guestbook-v1";
 
   const state = {
     screen: "difficulty",
@@ -14,14 +13,11 @@
     heard: "",
     status: "Нажми и скажи вслух",
     hintOn: false,
-    qrMissing: false,
     liveError: "",
     verdict: "",
     slander: 0,
     diffError: "",
     hardcoreReady: false,
-    guestbookStatus: "",
-    guestbookBusy: false,
   };
 
   const Speech =
@@ -82,46 +78,6 @@
     render();
   }
 
-  function loadGuestbook() {
-    try {
-      const raw = localStorage.getItem(GUESTBOOK_KEY);
-      const list = raw ? JSON.parse(raw) : [];
-      return Array.isArray(list) ? list : [];
-    } catch (err) {
-      return [];
-    }
-  }
-
-  function saveGuestbook(list) {
-    localStorage.setItem(GUESTBOOK_KEY, JSON.stringify(list));
-  }
-
-  function telegramConfigured() {
-    return Boolean(Q.telegram && Q.telegram.botToken && Q.telegram.chatId);
-  }
-
-  function sendTelegram(text) {
-    if (!telegramConfigured()) {
-      return Promise.reject(new Error("telegram-not-configured"));
-    }
-    const url =
-      "https://api.telegram.org/bot" +
-      encodeURIComponent(Q.telegram.botToken) +
-      "/sendMessage";
-    return fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: Q.telegram.chatId,
-        text: text,
-        disable_web_page_preview: true,
-      }),
-    }).then((res) => {
-      if (!res.ok) throw new Error("telegram-http-" + res.status);
-      return res.json();
-    });
-  }
-
   function progressDots() {
     return ["quiz", "candles", "oath", "gift"]
       .map((id, i) => {
@@ -144,12 +100,14 @@
         app.innerHTML = `
           <section class="screen is-on">
             ${mascotsHtml()}
-            <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
-            <h1 class="brand">${escapeHtml(Q.herName)}</h1>
-            <div class="rule"></div>
-            <div class="hardcore-ok">
-              <p>${escapeHtml(D.options.find((o) => o.id === "hardcore").accept)}</p>
-              <button class="btn btn-solid" type="button" data-act="begin">Далее</button>
+            <div class="panel">
+              <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
+              <h1 class="brand">${escapeHtml(Q.herName)}</h1>
+              <div class="rule"></div>
+              <div class="hardcore-ok">
+                <p>${escapeHtml(D.options.find((o) => o.id === "hardcore").accept)}</p>
+                <button class="btn btn-solid" type="button" data-act="begin">Далее</button>
+              </div>
             </div>
           </section>`;
         return;
@@ -158,23 +116,29 @@
       app.innerHTML = `
         <section class="screen is-on">
           ${mascotsHtml()}
-          <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
-          <h1 class="brand">${escapeHtml(Q.herName)}</h1>
-          <div class="rule"></div>
-          <h2 class="display display-m">${escapeHtml(D.title)}</h2>
-          <p class="lede">${escapeHtml(D.lead)}</p>
-          <div class="difficulty">
-            ${D.options
-              .map((opt) => {
-                const hard = opt.id === "hardcore";
-                return `<button class="diff-btn${hard ? " is-hardcore" : ""}" type="button" data-act="diff" data-id="${escapeAttr(opt.id)}">
-                  <strong>${escapeHtml(opt.label)}</strong>
-                  <span>${escapeHtml(opt.hint || "")}</span>
-                </button>`;
-              })
-              .join("")}
+          <div class="panel">
+            <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
+            <h1 class="brand">${escapeHtml(Q.herName)}</h1>
+            <div class="rule"></div>
+            <h2 class="display display-m">${escapeHtml(D.title)}</h2>
+            <p class="lede">${escapeHtml(D.lead)}</p>
+            <div class="difficulty">
+              ${D.options
+                .map((opt) => {
+                  const hard = opt.id === "hardcore";
+                  const hint =
+                    hard && opt.hint
+                      ? `<span>${escapeHtml(opt.hint)}</span>`
+                      : "";
+                  return `<button class="diff-btn${hard ? " is-hardcore" : ""}" type="button" data-act="diff" data-id="${escapeAttr(opt.id)}">
+                    <strong>${escapeHtml(opt.label)}</strong>
+                    ${hint}
+                  </button>`;
+                })
+                .join("")}
+            </div>
+            <p class="diff-error${state.diffError ? " is-shake" : ""}" id="diff-error">${escapeHtml(state.diffError)}</p>
           </div>
-          <p class="diff-error${state.diffError ? " is-shake" : ""}" id="diff-error">${escapeHtml(state.diffError)}</p>
         </section>`;
       return;
     }
@@ -206,25 +170,27 @@
       app.innerHTML = `
         <section class="screen screen-cake is-on">
           <div class="progress">${dots}</div>
-          <p class="kicker">Испытание</p>
-          <h1 class="display display-m">Тридцать огней</h1>
-          <p class="lede">Погаси каждую свечу. Пока горит хотя бы одна — замок не откроется.</p>
-          <div class="cake-scene" id="cake-scene" style="--lit:${left}">
-            <div class="cake-halo"></div>
-            <div class="cake">
-              <div class="cake-top" id="cake-top">
-                ${candleSpots(CANDLE_COUNT)
-                  .map((spot, i) => candleHtml(i, spot))
-                  .join("")}
+          <div class="panel panel-wide">
+            <p class="kicker">Испытание</p>
+            <h1 class="display display-m">Тридцать огней</h1>
+            <p class="lede">Погаси каждую свечу. Пока горит хотя бы одна — замок не откроется.</p>
+            <div class="cake-scene" id="cake-scene" style="--lit:${left}">
+              <div class="cake-halo"></div>
+              <div class="cake">
+                <div class="cake-top" id="cake-top">
+                  ${candleSpots(CANDLE_COUNT)
+                    .map((spot, i) => candleHtml(i, spot))
+                    .join("")}
+                </div>
+                <div class="cake-body">
+                  <i class="drip"></i>
+                </div>
+                <div class="plate"></div>
+                <div class="plate-shadow"></div>
               </div>
-              <div class="cake-body">
-                <i class="drip"></i>
-              </div>
-              <div class="plate"></div>
-              <div class="plate-shadow"></div>
             </div>
+            <p class="flame-count" id="flame-count">${left} <span>ещё горят</span></p>
           </div>
-          <p class="flame-count" id="flame-count">${left} <span>ещё горят</span></p>
         </section>`;
       return;
     }
@@ -233,94 +199,80 @@
       app.innerHTML = `
         <section class="screen is-on">
           <div class="progress">${dots}</div>
-          <p class="kicker">Голосовой замок</p>
-          <h1 class="display display-m">Клятва</h1>
-          <div class="rule"></div>
-          <p class="riddle-lead">${escapeHtml(Q.riddleLead)}</p>
-          <ul class="riddle">
-            ${Q.riddle.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}
-          </ul>
-          <button class="mic${state.listening ? " is-live" : ""}" id="mic-btn" type="button" data-act="listen" ${
-            Speech ? "" : "disabled"
-          }>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/>
-              <path d="M6 11a6 6 0 0 0 12 0" stroke="currentColor" stroke-width="1.6"/>
-              <path d="M12 17v4" stroke="currentColor" stroke-width="1.6"/>
-            </svg>
-          </button>
-          <p class="mic-label" id="mic-status">${escapeHtml(state.status)}</p>
-          <p class="heard${state.verdict ? " is-" + state.verdict : ""}" id="mic-heard">${escapeHtml(state.heard || state.liveError)}</p>
-          ${
-            state.hintOn
-              ? `<p class="lede">Подсказка: «${escapeHtml(Q.hint)}»</p>`
-              : `<button class="ghost" type="button" data-act="hint">Сдаюсь, нужна подсказка</button>`
-          }
-          <details class="fallback">
-            <summary>Микрофон не работает</summary>
-            <div class="row">
-              <input id="typed" type="text" autocomplete="off" placeholder="напиши три слова" />
-              <button class="btn btn-solid" type="button" data-act="type">Ок</button>
-            </div>
-          </details>
+          <div class="panel">
+            <p class="kicker">Голосовой замок</p>
+            <h1 class="display display-m">Клятва</h1>
+            <div class="rule"></div>
+            <p class="riddle-lead">${escapeHtml(Q.riddleLead)}</p>
+            <ul class="riddle">
+              ${Q.riddle.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}
+            </ul>
+            <button class="mic${state.listening ? " is-live" : ""}" id="mic-btn" type="button" data-act="listen" ${
+              Speech ? "" : "disabled"
+            }>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M6 11a6 6 0 0 0 12 0" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M12 17v4" stroke="currentColor" stroke-width="1.6"/>
+              </svg>
+            </button>
+            <p class="mic-label" id="mic-status">${escapeHtml(state.status)}</p>
+            <p class="heard${state.verdict ? " is-" + state.verdict : ""}" id="mic-heard">${escapeHtml(state.heard || state.liveError)}</p>
+            ${
+              state.hintOn
+                ? `<p class="lede">Подсказка: «${escapeHtml(Q.hint)}»</p>`
+                : `<button class="ghost" type="button" data-act="hint">Сдаюсь, нужна подсказка</button>`
+            }
+            <details class="fallback">
+              <summary>Микрофон не работает</summary>
+              <div class="row">
+                <input id="typed" type="text" autocomplete="off" placeholder="напиши три слова" />
+                <button class="btn btn-solid" type="button" data-act="type">Ок</button>
+              </div>
+            </details>
+          </div>
         </section>`;
       return;
     }
 
     if (state.screen === "gift") {
-      const entries = loadGuestbook();
+      const codes = Q.codes || [];
       app.innerHTML = `
         <section class="screen is-on">
           <div class="progress">${dots}</div>
-          <p class="kicker">замок открыт</p>
-          <h1 class="display display-m">Подарок</h1>
-          <div class="rule"></div>
-          <article class="gift-card">
-            <img id="qr" src="${escapeAttr(Q.qrImage)}" alt="QR-код подарка" />
-            <div class="missing-qr${state.qrMissing ? " is-on" : ""}" id="missing">
-              Положи файл <b>qr.png</b> в папку <b>assets</b> — и обнови страницу.
+          <div class="panel">
+            <p class="kicker">замок открыт</p>
+            <h1 class="display display-m">Подарки</h1>
+            <div class="rule"></div>
+            <p class="lede gift-lead">${escapeHtml(Q.giftCaption)}</p>
+            <div class="codes">
+              ${codes
+                .map(
+                  (code, i) => `
+                <article class="code-card" data-code="${i}">
+                  <h3>${escapeHtml(code.title)}</h3>
+                  <img src="${escapeAttr(code.image)}" alt="${escapeAttr(code.title)}" data-code-img="${i}" />
+                  <div class="missing-code" id="missing-${i}">
+                    Положи файл <b>${escapeHtml(code.fileHint || code.image)}</b> в папку <b>assets</b> — и обнови страницу.
+                  </div>
+                </article>`
+                )
+                .join("")}
             </div>
-            <p>${escapeHtml(Q.giftCaption)}</p>
             <p class="after">${escapeHtml(Q.afterword)}</p>
-          </article>
-          <form class="guestbook" id="guestbook-form">
-            <h3>${escapeHtml(Q.guestbookTitle)}</h3>
-            <p class="hint">${escapeHtml(Q.guestbookHint)}</p>
-            <div class="field">
-              <label for="gb-name">От кого</label>
-              <input id="gb-name" name="name" type="text" maxlength="60" autocomplete="name" placeholder="Марго" required />
-            </div>
-            <div class="field">
-              <label for="gb-msg">Запись</label>
-              <textarea id="gb-msg" name="message" maxlength="500" placeholder="Спасибо за квест…" required></textarea>
-            </div>
-            <button class="btn btn-solid" type="submit" ${state.guestbookBusy ? "disabled" : ""}>Отправить</button>
-            <p class="guestbook-status">${escapeHtml(state.guestbookStatus)}</p>
-            ${
-              entries.length
-                ? `<ul class="guestbook-list">${entries
-                    .slice()
-                    .reverse()
-                    .slice(0, 8)
-                    .map(
-                      (e) =>
-                        `<li><strong>${escapeHtml(e.name)}</strong>${escapeHtml(e.message)}</li>`
-                    )
-                    .join("")}</ul>`
-                : ""
-            }
-          </form>
+          </div>
         </section>`;
-      const img = document.getElementById("qr");
-      img.addEventListener("error", () => {
-        img.classList.add("hidden");
-        state.qrMissing = true;
-        document.getElementById("missing").classList.add("is-on");
+      codes.forEach((_, i) => {
+        const img = app.querySelector(`[data-code-img="${i}"]`);
+        const missing = document.getElementById("missing-" + i);
+        if (!img || !missing) return;
+        const showMissing = () => {
+          img.classList.add("hidden");
+          missing.classList.add("is-on");
+        };
+        img.addEventListener("error", showMissing);
+        if (img.complete && img.naturalWidth === 0) showMissing();
       });
-      const form = document.getElementById("guestbook-form");
-      if (form) {
-        form.addEventListener("submit", onGuestbookSubmit);
-      }
     }
   }
 
@@ -348,62 +300,6 @@
     state.diffError = opt.reject || "нет";
     state.hardcoreReady = false;
     render();
-  }
-
-  function onGuestbookSubmit(event) {
-    event.preventDefault();
-    if (state.guestbookBusy) return;
-    const nameInput = document.getElementById("gb-name");
-    const msgInput = document.getElementById("gb-msg");
-    const name = nameInput ? nameInput.value.trim() : "";
-    const message = msgInput ? msgInput.value.trim() : "";
-    if (!name || !message) {
-      state.guestbookStatus = "Заполни оба поля.";
-      render();
-      return;
-    }
-
-    const entry = {
-      id: Date.now(),
-      name: name,
-      message: message,
-      at: new Date().toISOString(),
-    };
-
-    const list = loadGuestbook();
-    list.push(entry);
-    saveGuestbook(list);
-
-    state.guestbookBusy = true;
-    state.guestbookStatus = "Отправляю…";
-    render();
-
-    const text = [
-      "🎂 Запись с сайта Марго",
-      "От: " + entry.name,
-      "",
-      entry.message,
-      "",
-      "время: " + new Date(entry.at).toLocaleString("ru-RU"),
-    ].join("\n");
-
-    sendTelegram(text)
-      .then(() => {
-        state.guestbookBusy = false;
-        state.guestbookStatus = Q.guestbookThanks || "Сохранено.";
-        render();
-      })
-      .catch((err) => {
-        state.guestbookBusy = false;
-        if (String(err && err.message) === "telegram-not-configured") {
-          state.guestbookStatus =
-            "Сохранено на устройстве. Добавь botToken и chatId в config.js — и записи пойдут в Telegram.";
-        } else {
-          state.guestbookStatus =
-            "Сохранено локально, но Telegram не ответил. Проверь токен и chat_id.";
-        }
-        render();
-      });
   }
 
   function answer(i) {
