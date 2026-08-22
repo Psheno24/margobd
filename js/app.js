@@ -3,9 +3,10 @@
   const app = document.getElementById("app");
   const canvas = document.getElementById("confetti");
   const CANDLE_COUNT = 30;
+  const GUESTBOOK_KEY = "margo-guestbook-v1";
 
   const state = {
-    screen: "intro",
+    screen: "difficulty",
     qIndex: 0,
     toast: "",
     blown: [],
@@ -17,6 +18,10 @@
     liveError: "",
     verdict: "",
     slander: 0,
+    diffError: "",
+    hardcoreReady: false,
+    guestbookStatus: "",
+    guestbookBusy: false,
   };
 
   const Speech =
@@ -26,6 +31,13 @@
   let wantListen = false;
   let suppressAbort = false;
   let judgedFinals = 0;
+
+  function mascotsHtml() {
+    return `<div class="mascots" aria-hidden="true">
+      <img class="mascot mascot-flower" src="assets/tsvetochka.webp" alt="" />
+      <img class="mascot mascot-bee" src="assets/shmelechka.webp" alt="" />
+    </div>`;
+  }
 
   function normalize(text) {
     return String(text || "")
@@ -70,8 +82,48 @@
     render();
   }
 
-  function render() {
-    const dots = ["quiz", "candles", "oath", "gift"]
+  function loadGuestbook() {
+    try {
+      const raw = localStorage.getItem(GUESTBOOK_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function saveGuestbook(list) {
+    localStorage.setItem(GUESTBOOK_KEY, JSON.stringify(list));
+  }
+
+  function telegramConfigured() {
+    return Boolean(Q.telegram && Q.telegram.botToken && Q.telegram.chatId);
+  }
+
+  function sendTelegram(text) {
+    if (!telegramConfigured()) {
+      return Promise.reject(new Error("telegram-not-configured"));
+    }
+    const url =
+      "https://api.telegram.org/bot" +
+      encodeURIComponent(Q.telegram.botToken) +
+      "/sendMessage";
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: Q.telegram.chatId,
+        text: text,
+        disable_web_page_preview: true,
+      }),
+    }).then((res) => {
+      if (!res.ok) throw new Error("telegram-http-" + res.status);
+      return res.json();
+    });
+  }
+
+  function progressDots() {
+    return ["quiz", "candles", "oath", "gift"]
       .map((id, i) => {
         const on =
           (state.screen === "quiz" && i === 0) ||
@@ -81,19 +133,48 @@
         return `<i class="dot${on ? " is-on" : ""}"></i>`;
       })
       .join("");
+  }
 
-    if (state.screen === "intro") {
+  function render() {
+    const dots = progressDots();
+
+    if (state.screen === "difficulty") {
+      const D = Q.difficulty;
+      if (state.hardcoreReady) {
+        app.innerHTML = `
+          <section class="screen is-on">
+            ${mascotsHtml()}
+            <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
+            <h1 class="brand">${escapeHtml(Q.herName)}</h1>
+            <div class="rule"></div>
+            <div class="hardcore-ok">
+              <p>${escapeHtml(D.options.find((o) => o.id === "hardcore").accept)}</p>
+              <button class="btn btn-solid" type="button" data-act="begin">Далее</button>
+            </div>
+          </section>`;
+        return;
+      }
+
       app.innerHTML = `
         <section class="screen is-on">
-          <p class="kicker">${Q.dateLabel || "секретное послание"}</p>
-          <h1 class="display">${escapeHtml(Q.herName)}</h1>
+          ${mascotsHtml()}
+          <p class="kicker">${escapeHtml(Q.dateLabel || "квест")}</p>
+          <h1 class="brand">${escapeHtml(Q.herName)}</h1>
           <div class="rule"></div>
-          <p class="lede">Чтобы открыть подарок, придётся пройти короткое испытание. И сказать одну важную вещь вслух.</p>
-          <div style="height:28px"></div>
-          <button class="seal" type="button" data-act="start">
-            ${escapeHtml(Q.herName.charAt(0))}
-            <span>вскрыть</span>
-          </button>
+          <h2 class="display display-m">${escapeHtml(D.title)}</h2>
+          <p class="lede">${escapeHtml(D.lead)}</p>
+          <div class="difficulty">
+            ${D.options
+              .map((opt) => {
+                const hard = opt.id === "hardcore";
+                return `<button class="diff-btn${hard ? " is-hardcore" : ""}" type="button" data-act="diff" data-id="${escapeAttr(opt.id)}">
+                  <strong>${escapeHtml(opt.label)}</strong>
+                  <span>${escapeHtml(opt.hint || "")}</span>
+                </button>`;
+              })
+              .join("")}
+          </div>
+          <p class="diff-error${state.diffError ? " is-shake" : ""}" id="diff-error">${escapeHtml(state.diffError)}</p>
         </section>`;
       return;
     }
@@ -187,6 +268,7 @@
     }
 
     if (state.screen === "gift") {
+      const entries = loadGuestbook();
       app.innerHTML = `
         <section class="screen is-on">
           <div class="progress">${dots}</div>
@@ -201,6 +283,33 @@
             <p>${escapeHtml(Q.giftCaption)}</p>
             <p class="after">${escapeHtml(Q.afterword)}</p>
           </article>
+          <form class="guestbook" id="guestbook-form">
+            <h3>${escapeHtml(Q.guestbookTitle)}</h3>
+            <p class="hint">${escapeHtml(Q.guestbookHint)}</p>
+            <div class="field">
+              <label for="gb-name">От кого</label>
+              <input id="gb-name" name="name" type="text" maxlength="60" autocomplete="name" placeholder="Марго" required />
+            </div>
+            <div class="field">
+              <label for="gb-msg">Запись</label>
+              <textarea id="gb-msg" name="message" maxlength="500" placeholder="Спасибо за квест…" required></textarea>
+            </div>
+            <button class="btn btn-solid" type="submit" ${state.guestbookBusy ? "disabled" : ""}>Отправить</button>
+            <p class="guestbook-status">${escapeHtml(state.guestbookStatus)}</p>
+            ${
+              entries.length
+                ? `<ul class="guestbook-list">${entries
+                    .slice()
+                    .reverse()
+                    .slice(0, 8)
+                    .map(
+                      (e) =>
+                        `<li><strong>${escapeHtml(e.name)}</strong>${escapeHtml(e.message)}</li>`
+                    )
+                    .join("")}</ul>`
+                : ""
+            }
+          </form>
         </section>`;
       const img = document.getElementById("qr");
       img.addEventListener("error", () => {
@@ -208,6 +317,10 @@
         state.qrMissing = true;
         document.getElementById("missing").classList.add("is-on");
       });
+      const form = document.getElementById("guestbook-form");
+      if (form) {
+        form.addEventListener("submit", onGuestbookSubmit);
+      }
     }
   }
 
@@ -221,6 +334,76 @@
 
   function escapeAttr(s) {
     return escapeHtml(s);
+  }
+
+  function pickDifficulty(id) {
+    const opt = Q.difficulty.options.find((o) => o.id === id);
+    if (!opt) return;
+    if (opt.id === "hardcore") {
+      state.diffError = "";
+      state.hardcoreReady = true;
+      render();
+      return;
+    }
+    state.diffError = opt.reject || "нет";
+    state.hardcoreReady = false;
+    render();
+  }
+
+  function onGuestbookSubmit(event) {
+    event.preventDefault();
+    if (state.guestbookBusy) return;
+    const nameInput = document.getElementById("gb-name");
+    const msgInput = document.getElementById("gb-msg");
+    const name = nameInput ? nameInput.value.trim() : "";
+    const message = msgInput ? msgInput.value.trim() : "";
+    if (!name || !message) {
+      state.guestbookStatus = "Заполни оба поля.";
+      render();
+      return;
+    }
+
+    const entry = {
+      id: Date.now(),
+      name: name,
+      message: message,
+      at: new Date().toISOString(),
+    };
+
+    const list = loadGuestbook();
+    list.push(entry);
+    saveGuestbook(list);
+
+    state.guestbookBusy = true;
+    state.guestbookStatus = "Отправляю…";
+    render();
+
+    const text = [
+      "🎂 Запись с сайта Марго",
+      "От: " + entry.name,
+      "",
+      entry.message,
+      "",
+      "время: " + new Date(entry.at).toLocaleString("ru-RU"),
+    ].join("\n");
+
+    sendTelegram(text)
+      .then(() => {
+        state.guestbookBusy = false;
+        state.guestbookStatus = Q.guestbookThanks || "Сохранено.";
+        render();
+      })
+      .catch((err) => {
+        state.guestbookBusy = false;
+        if (String(err && err.message) === "telegram-not-configured") {
+          state.guestbookStatus =
+            "Сохранено на устройстве. Добавь botToken и chatId в config.js — и записи пойдут в Telegram.";
+        } else {
+          state.guestbookStatus =
+            "Сохранено локально, но Telegram не ответил. Проверь токен и chat_id.";
+        }
+        render();
+      });
   }
 
   function answer(i) {
@@ -532,7 +715,8 @@
     const btn = event.target.closest("[data-act]");
     if (!btn) return;
     const act = btn.getAttribute("data-act");
-    if (act === "start") go("quiz", { qIndex: 0, toast: "" });
+    if (act === "diff") pickDifficulty(btn.getAttribute("data-id"));
+    if (act === "begin") go("quiz", { qIndex: 0, toast: "" });
     if (act === "answer") answer(Number(btn.getAttribute("data-i")));
     if (act === "blow") blow(Number(btn.getAttribute("data-i")));
     if (act === "listen") startListen();
@@ -554,6 +738,7 @@
     const ctx = canvas.getContext("2d");
     const w = (canvas.width = window.innerWidth);
     const h = (canvas.height = window.innerHeight);
+    const colors = ["#f07828", "#ffd24a", "#6ec8e8", "#ff7a9a", "#3d9a45", "#1a1a1a"];
     const bits = Array.from({ length: 90 }, () => ({
       x: w * 0.5 + (Math.random() - 0.5) * 80,
       y: h * 0.22,
@@ -562,7 +747,7 @@
       g: 0.16 + Math.random() * 0.08,
       s: 3 + Math.random() * 5,
       a: 1,
-      c: Math.random() > 0.5 ? "#c9a66b" : "#f3ead7",
+      c: colors[Math.floor(Math.random() * colors.length)],
     }));
 
     let frame = 0;
@@ -592,6 +777,8 @@
     go("candles", { blown: [] });
   } else if (params.get("oath") === "1") {
     go("oath");
+  } else if (params.get("quiz") === "1") {
+    go("quiz", { qIndex: 0, toast: "" });
   } else {
     render();
   }
