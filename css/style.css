@@ -1001,6 +1001,11 @@ textarea {
   box-shadow: 3px 3px 0 #1a1a1a;
   text-align: center;
   min-width: 0;
+  cursor: pointer;
+}
+
+.code-card:active {
+  transform: scale(0.98);
 }
 
 .code-card h3 {
@@ -1042,6 +1047,58 @@ textarea {
   font-family: "Baloo 2", sans-serif;
   font-size: 20px;
   font-weight: 800;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: rgba(18, 14, 10, 0.92);
+}
+
+.lightbox.hidden {
+  display: none !important;
+}
+
+.lightbox-inner {
+  width: min(100%, 520px);
+  text-align: center;
+}
+
+.lightbox-kicker {
+  margin: 0 0 6px;
+  color: #ffd24a;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.lightbox-title {
+  margin: 0 0 16px;
+  font-family: "Baloo 2", sans-serif;
+  font-size: clamp(28px, 8vw, 44px);
+  font-weight: 800;
+  line-height: 1;
+  color: #fffdf8;
+}
+
+.lightbox img {
+  display: block;
+  width: 100%;
+  max-height: min(68dvh, 68vh);
+  object-fit: contain;
+  background: #fff;
+  border: 3px solid #1a1a1a;
+  border-radius: 18px;
+}
+
+.lightbox-close {
+  margin-top: 16px;
 }
 
 

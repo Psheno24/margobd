@@ -254,7 +254,7 @@
               ${codes
                 .map(
                   (code, i) => `
-                <article class="code-card" data-code="${i}">
+                <article class="code-card" data-code="${i}" role="button" tabindex="0">
                   <h3>${escapeHtml(code.title)}</h3>
                   <img src="${escapeAttr(code.image)}" alt="${escapeAttr(code.title)}" data-code-img="${i}" />
                   <div class="missing-code" id="missing-${i}">
@@ -655,11 +655,51 @@
     if (act === "type") tryTyped();
   });
 
+  function openCode(i) {
+    const code = (Q.codes || [])[i];
+    const box = document.getElementById("lightbox");
+    const title = document.getElementById("lightbox-title");
+    const img = document.getElementById("lightbox-img");
+    if (!code || !box || !title || !img) return;
+    const thumb = app.querySelector(`[data-code-img="${i}"]`);
+    if (thumb && thumb.classList.contains("hidden")) return;
+    title.textContent = code.title;
+    img.src = code.image;
+    img.alt = code.title;
+    box.hidden = false;
+    box.classList.remove("hidden");
+  }
+
+  function closeCode() {
+    const box = document.getElementById("lightbox");
+    if (!box) return;
+    box.hidden = true;
+    box.classList.add("hidden");
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-code]") || event.target.id === "lightbox") {
+      closeCode();
+      return;
+    }
+    const card = event.target.closest(".code-card");
+    if (!card || event.target.closest(".missing-code")) return;
+    openCode(Number(card.getAttribute("data-code")));
+  });
+
   app.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && event.target.id === "typed") {
       event.preventDefault();
       tryTyped();
     }
+    if (event.key === "Enter" && event.target.closest(".code-card")) {
+      event.preventDefault();
+      openCode(Number(event.target.closest(".code-card").getAttribute("data-code")));
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeCode();
   });
 
   function burst() {
