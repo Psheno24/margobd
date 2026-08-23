@@ -32,18 +32,27 @@
 html,
 body {
   margin: 0;
-  min-height: 100%;
+  height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
   background: var(--sky);
   color: var(--ink);
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   font-family: "Nunito", "Segoe UI", sans-serif;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.35;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  width: 100%;
 }
 
 button,
@@ -55,8 +64,10 @@ textarea {
 #app {
   position: relative;
   z-index: 2;
-  min-height: 100dvh;
-  min-height: 100svh;
+  height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
 .sky {
@@ -186,7 +197,7 @@ textarea {
   pointer-events: none;
   position: fixed;
   inset: auto 0 0;
-  height: 26%;
+  height: 12%;
   z-index: 0;
   background:
     radial-gradient(circle at 8% 40%, #ff7a9a 0 10px, transparent 11px),
@@ -203,18 +214,21 @@ textarea {
 
 .screen {
   display: none;
-  min-height: 100dvh;
-  min-height: 100svh;
-  padding: calc(24px + var(--safe-top)) 20px calc(36px + var(--safe-bottom));
+  height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: calc(10px + var(--safe-top)) 14px calc(12px + var(--safe-bottom));
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
+  overflow: hidden;
+  gap: 8px;
 }
 
 .screen.is-on {
   display: flex;
-  animation: rise 0.55s ease both;
+  animation: rise 0.45s ease both;
 }
 
 @keyframes rise {
@@ -232,24 +246,25 @@ textarea {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 10px;
-  margin: 0 0 10px;
+  gap: 8px;
+  margin: 0;
   width: min(100%, 420px);
+  flex: 0 0 auto;
 }
 
 .mascot {
-  width: min(42vw, 170px);
+  width: min(28vw, 112px);
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 28px;
+  border-radius: 20px;
   border: var(--line);
   background: #8ed7f0;
-  box-shadow: 6px 6px 0 #1a1a1a;
+  box-shadow: 4px 4px 0 #1a1a1a;
   animation: bounce 3.2s ease-in-out infinite;
 }
 
 .mascot-bee {
-  width: min(38vw, 150px);
+  width: min(24vw, 96px);
   animation-delay: -1.4s;
 }
 
@@ -259,27 +274,31 @@ textarea {
 }
 
 .kicker {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--bee-brown);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .panel {
   width: min(100%, 420px);
-  padding: 22px 18px 20px;
+  max-height: min(78dvh, 720px);
+  padding: 14px 14px 12px;
   background: rgba(255, 253, 248, 0.96);
   color: var(--ink);
   border: var(--line);
-  border-radius: 28px;
-  box-shadow: 6px 6px 0 #1a1a1a;
+  border-radius: 24px;
+  box-shadow: 5px 5px 0 #1a1a1a;
   text-align: center;
+  overflow: hidden;
+  flex: 0 1 auto;
 }
 
 .panel-wide {
-  width: min(100%, 460px);
+  width: min(100%, 440px);
+  max-height: min(86dvh, 780px);
 }
 
 .panel .kicker {
@@ -312,40 +331,40 @@ textarea {
   margin: 0;
   font-family: "Baloo 2", "Nunito", sans-serif;
   font-weight: 800;
-  font-size: clamp(48px, 15vw, 84px);
+  font-size: clamp(36px, 11vw, 64px);
   line-height: 0.88;
   letter-spacing: -0.02em;
   color: var(--ink);
   text-shadow:
-    3px 3px 0 #fff,
-    6px 6px 0 rgba(26, 26, 26, 0.12);
+    2px 2px 0 #fff,
+    4px 4px 0 rgba(26, 26, 26, 0.12);
 }
 
 .display {
   margin: 0;
   font-family: "Baloo 2", "Nunito", sans-serif;
   font-weight: 800;
-  font-size: clamp(30px, 10vw, 48px);
+  font-size: clamp(24px, 7vw, 36px);
   line-height: 0.98;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
 
 .display-m {
-  font-size: clamp(26px, 8vw, 40px);
+  font-size: clamp(22px, 6.5vw, 32px);
 }
 
 .lede {
   max-width: 22rem;
-  margin: 12px 0 0;
+  margin: 8px auto 0;
   color: rgba(26, 26, 26, 0.82);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .rule {
-  width: 56px;
-  height: 8px;
-  margin: 14px auto;
+  width: 48px;
+  height: 6px;
+  margin: 8px auto;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--petal), var(--honey));
   border: 2px solid var(--ink);
@@ -381,23 +400,23 @@ textarea {
 }
 
 .difficulty {
-  width: min(100%, 420px);
+  width: 100%;
   display: grid;
-  gap: 10px;
-  margin-top: 18px;
+  gap: 7px;
+  margin-top: 10px;
 }
 
 .diff-btn {
   position: relative;
   width: 100%;
-  padding: 14px 16px;
+  padding: 10px 12px;
   border: var(--line);
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--cream);
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  box-shadow: 4px 4px 0 #1a1a1a;
+  box-shadow: 3px 3px 0 #1a1a1a;
   transition: transform 0.12s ease;
 }
 
@@ -409,7 +428,7 @@ textarea {
 .diff-btn strong {
   display: block;
   font-family: "Baloo 2", sans-serif;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 800;
 }
 
@@ -421,8 +440,8 @@ textarea {
 }
 
 .diff-btn.is-hardcore {
-  margin-top: 4px;
-  padding: 18px 16px;
+  margin-top: 2px;
+  padding: 12px 12px;
   background:
     linear-gradient(135deg, #2a0a0a, #4a1010 40%, #1a0505),
     repeating-linear-gradient(-35deg, rgba(255, 210, 74, 0.12) 0 8px, transparent 8px 16px);
@@ -430,14 +449,14 @@ textarea {
   border-color: var(--hardcore-fire);
   box-shadow:
     0 0 0 2px #1a1a1a,
-    5px 5px 0 #ff3b1f;
+    4px 4px 0 #ff3b1f;
   animation: hardcore-pulse 1.5s ease-in-out infinite;
   text-transform: uppercase;
 }
 
 .diff-btn.is-hardcore strong {
-  font-size: 28px;
-  letter-spacing: 0.08em;
+  font-size: 22px;
+  letter-spacing: 0.06em;
   text-shadow: 0 0 16px rgba(255, 59, 31, 0.8);
 }
 
@@ -496,13 +515,15 @@ textarea {
 
 .paper {
   width: min(100%, 420px);
-  padding: 24px 18px 18px;
+  max-height: min(82dvh, 720px);
+  padding: 16px 14px 12px;
   background: var(--paper);
   color: var(--paper-ink);
   text-align: left;
-  border-radius: 24px;
+  border-radius: 22px;
   border: var(--line);
-  box-shadow: 6px 6px 0 #1a1a1a;
+  box-shadow: 5px 5px 0 #1a1a1a;
+  overflow: hidden;
 }
 
 .paper .kicker {
@@ -560,9 +581,10 @@ textarea {
 
 .progress {
   display: flex;
-  gap: 7px;
+  gap: 6px;
   justify-content: center;
-  margin-bottom: 14px;
+  margin-bottom: 0;
+  flex: 0 0 auto;
 }
 
 .dot {
@@ -578,22 +600,24 @@ textarea {
 }
 
 .screen-cake {
-  justify-content: flex-start;
-  padding-top: calc(18px + var(--safe-top));
+  justify-content: center;
+  padding-top: calc(8px + var(--safe-top));
 }
 
 .screen-cake .lede {
-  margin-top: 8px;
-  margin-bottom: 6px;
-  font-size: 15px;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  font-size: 13px;
 }
 
 .cake-scene {
   --lit: 30;
   position: relative;
-  width: min(100%, 420px);
-  margin: 8px auto 0;
-  padding: 20px 0 18px;
+  width: min(100%, 340px);
+  margin: 0 auto;
+  padding: 4px 0 4px;
+  transform: scale(0.92);
+  transform-origin: top center;
 }
 
 .cake-halo {
@@ -611,15 +635,15 @@ textarea {
 .cake {
   position: relative;
   z-index: 1;
-  width: 78%;
-  margin: 36px auto 0;
+  width: 72%;
+  margin: 24px auto 0;
 }
 
 .cake-top {
   position: relative;
   z-index: 2;
-  height: 96px;
-  margin-bottom: -48px;
+  height: 78px;
+  margin-bottom: -40px;
   border-radius: 50%;
   border: 3px solid var(--ink);
   background:
@@ -630,7 +654,7 @@ textarea {
 .cake-body {
   position: relative;
   z-index: 1;
-  height: 92px;
+  height: 72px;
   border: 3px solid var(--ink);
   border-top: 0;
   border-radius: 0 0 16px 16px;
@@ -797,10 +821,10 @@ textarea {
 }
 
 .flame-count {
-  margin: 14px 0 0;
+  margin: 6px 0 0;
   color: var(--ink);
   font-family: "Baloo 2", sans-serif;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 800;
 }
 
@@ -824,26 +848,26 @@ textarea {
 .riddle {
   width: 100%;
   max-width: 100%;
-  margin: 0 0 24px;
+  margin: 0 0 14px;
   padding: 0;
   list-style: none;
   color: var(--ink);
-  font-size: clamp(13px, 3.5vw, 16px);
-  line-height: 1.35;
+  font-size: clamp(12px, 3.2vw, 15px);
+  line-height: 1.3;
 }
 
 .riddle li + li {
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .mic {
-  width: 96px;
-  height: 96px;
+  width: 72px;
+  height: 72px;
   border: var(--line);
   border-radius: 50%;
   background: var(--honey);
   color: var(--ink);
-  box-shadow: 4px 4px 0 #1a1a1a;
+  box-shadow: 3px 3px 0 #1a1a1a;
   cursor: pointer;
 }
 
@@ -928,8 +952,12 @@ textarea {
   color: var(--paper-ink);
 }
 
+.gift-lead {
+  margin: 0 0 10px;
+}
+
 .ghost {
-  margin-top: 18px;
+  margin-top: 10px;
   border: 0;
   background: none;
   color: rgba(26, 26, 26, 0.5);
@@ -939,48 +967,49 @@ textarea {
   text-underline-offset: 3px;
 }
 
-.gift-lead {
-  margin: 0 0 16px;
-}
-
 .codes {
   display: grid;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .code-card {
-  padding: 14px;
+  padding: 8px;
   border: var(--line);
-  border-radius: 18px;
+  border-radius: 14px;
   background: #fff8e8;
   box-shadow: 3px 3px 0 #1a1a1a;
   text-align: center;
+  min-width: 0;
 }
 
 .code-card h3 {
-  margin: 0 0 10px;
+  margin: 0 0 6px;
   font-family: "Baloo 2", sans-serif;
-  font-size: 22px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--petal-deep);
+  line-height: 1.15;
 }
 
 .code-card img {
   display: block;
   width: 100%;
+  max-height: 28vh;
+  object-fit: contain;
   height: auto;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 2px solid var(--ink);
 }
 
 .missing-code {
   display: none;
-  padding: 28px 12px;
+  padding: 16px 8px;
   border: 2px dashed rgba(26, 26, 26, 0.35);
-  border-radius: 12px;
+  border-radius: 10px;
   color: #555;
-  font-size: 14px;
+  font-size: 11px;
   text-align: center;
 }
 
@@ -989,10 +1018,59 @@ textarea {
 }
 
 .panel .after {
-  margin: 16px 0 0;
+  margin: 10px 0 0;
   font-family: "Baloo 2", sans-serif;
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 800;
+}
+
+.fallback {
+  margin-top: 12px;
+}
+
+@media (max-height: 740px) {
+  .mascot {
+    width: min(22vw, 84px);
+  }
+
+  .mascot-bee {
+    width: min(20vw, 72px);
+  }
+
+  .panel {
+    padding: 10px 12px 10px;
+  }
+
+  .cake-scene {
+    transform: scale(0.8);
+  }
+
+  .diff-btn {
+    padding: 8px 10px;
+  }
+
+  .diff-btn.is-hardcore {
+    padding: 10px;
+  }
+
+  .diff-btn.is-hardcore strong {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mascot {
+    width: min(26vw, 100px);
+    border-radius: 18px;
+  }
+
+  .mascot-bee {
+    width: min(22vw, 86px);
+  }
+
+  .meadow {
+    height: 12%;
+  }
 }
 
 canvas.confetti {
@@ -1004,19 +1082,4 @@ canvas.confetti {
 
 .hidden {
   display: none !important;
-}
-
-@media (max-width: 520px) {
-  .mascot {
-    width: min(40vw, 130px);
-    border-radius: 22px;
-  }
-
-  .mascot-bee {
-    width: min(36vw, 114px);
-  }
-
-  .meadow {
-    height: 18%;
-  }
 }
