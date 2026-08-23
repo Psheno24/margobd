@@ -18,6 +18,8 @@
     slander: 0,
     diffError: "",
     hardcoreReady: false,
+    needType: false,
+    typeOpen: false,
   };
 
   const Speech =
@@ -122,6 +124,7 @@
             <div class="rule"></div>
             <h2 class="display display-m">${escapeHtml(D.title)}</h2>
             <p class="lede">${escapeHtml(D.lead)}</p>
+            <p class="lede lede-sub">${escapeHtml(D.leadSub)}</p>
             <div class="difficulty">
               ${D.options
                 .map((opt) => {
@@ -223,13 +226,15 @@
                 ? `<p class="lede">Подсказка: «${escapeHtml(Q.hint)}»</p>`
                 : `<button class="ghost" type="button" data-act="hint">Сдаюсь, нужна подсказка</button>`
             }
-            <details class="fallback">
-              <summary>Микрофон не работает</summary>
+            <button class="write-btn${state.needType || !Speech ? " is-hot" : ""}" id="write-btn" type="button" data-act="write">
+              Написать ответ
+            </button>
+            <div class="write-box${state.typeOpen || state.needType || !Speech ? "" : " hidden"}" id="write-box">
               <div class="row">
                 <input id="typed" type="text" autocomplete="off" placeholder="напиши три слова" />
                 <button class="btn btn-solid" type="button" data-act="type">Ок</button>
               </div>
-            </details>
+            </div>
           </div>
         </section>`;
       return;
@@ -306,7 +311,7 @@
     const q = Q.questions[state.qIndex];
     const opt = q.options[i];
     if (!opt.correct) {
-      state.toast = q.wrong;
+      state.toast = opt.wrong || "Мимо. Попробуй ещё раз.";
       render();
       const btn = app.querySelector(`[data-i="${i}"]`);
       if (btn) {
@@ -380,6 +385,20 @@
       heard.classList.remove("is-slander", "is-wrong");
       if (state.verdict) heard.classList.add("is-" + state.verdict);
     }
+    paintWriteBtn();
+  }
+
+  function paintWriteBtn() {
+    const btn = document.getElementById("write-btn");
+    const box = document.getElementById("write-box");
+    if (btn) btn.classList.toggle("is-hot", state.needType || !Speech);
+    if (box) box.classList.toggle("hidden", !(state.typeOpen || state.needType || !Speech));
+  }
+
+  function markNeedType() {
+    state.needType = true;
+    state.typeOpen = true;
+    paintWriteBtn();
   }
 
   function flashPunish() {
@@ -489,16 +508,20 @@
       state.listening = false;
       if (err === "not-allowed") {
         state.status = "Нет доступа к микрофону";
-        state.liveError = "Разреши микрофон в браузере или напиши фразу ниже.";
+        state.liveError = "Напиши ответ кнопкой ниже.";
+        markNeedType();
       } else if (err === "audio-capture") {
         state.status = "Микрофон недоступен";
-        state.liveError = "Проверь, что микрофон не занят другой программой.";
+        state.liveError = "Напиши ответ кнопкой ниже.";
+        markNeedType();
       } else if (err === "network") {
         state.status = "Нет связи с распознаванием";
-        state.liveError = "Chrome отправляет голос в интернет. Проверь сеть или напиши фразу ниже.";
+        state.liveError = "Напиши ответ кнопкой ниже.";
+        markNeedType();
       } else {
         state.status = "Не получилось слушать";
-        state.liveError = "Ошибка: " + err + ". Можно написать фразу ниже.";
+        state.liveError = "Напиши ответ кнопкой ниже.";
+        markNeedType();
       }
       paintOathStatus();
     };
@@ -527,7 +550,9 @@
 
   function startListen() {
     if (!Speech) {
-      state.liveError = "Этот браузер не умеет слушать. Напиши фразу ниже.";
+      state.status = "Микрофон недоступен";
+      state.liveError = "Напиши ответ кнопкой ниже.";
+      markNeedType();
       paintOathStatus();
       return;
     }
@@ -554,7 +579,8 @@
       wantListen = false;
       state.listening = false;
       state.status = "Не вышло включить микрофон";
-      state.liveError = String(err && err.message ? err.message : err);
+      state.liveError = "Напиши ответ кнопкой ниже.";
+      markNeedType();
       paintOathStatus();
       return;
     }
@@ -601,8 +627,8 @@
       return;
     }
     reactToSpeech(value);
-    const again = document.querySelector(".fallback");
-    if (again) again.open = true;
+    state.typeOpen = true;
+    paintWriteBtn();
     const next = document.getElementById("typed");
     if (next) next.value = value;
   }
@@ -619,6 +645,12 @@
     if (act === "hint") {
       state.hintOn = true;
       render();
+    }
+    if (act === "write") {
+      state.typeOpen = true;
+      paintWriteBtn();
+      const input = document.getElementById("typed");
+      if (input) input.focus();
     }
     if (act === "type") tryTyped();
   });

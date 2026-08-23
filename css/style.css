@@ -322,8 +322,7 @@ textarea {
   color: rgba(26, 26, 26, 0.62);
 }
 
-.panel .ghost,
-.panel .fallback summary {
+.panel .ghost {
   color: rgba(26, 26, 26, 0.55);
 }
 
@@ -359,6 +358,13 @@ textarea {
   margin: 8px auto 0;
   color: rgba(26, 26, 26, 0.82);
   font-size: 14px;
+}
+
+.lede-sub {
+  margin-top: 2px;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--ink);
 }
 
 .rule {
@@ -920,19 +926,33 @@ textarea {
   75% { transform: translateX(3px); }
 }
 
-.fallback {
-  margin-top: 28px;
-}
-
-.fallback summary {
+.write-btn {
+  display: block;
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 11px 16px;
+  border: var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
   cursor: pointer;
-  color: rgba(26, 26, 26, 0.5);
-  font-size: 13px;
-  list-style: none;
+  box-shadow: 3px 3px 0 #1a1a1a;
 }
 
-.fallback summary::-webkit-details-marker {
-  display: none;
+.write-btn.is-hot {
+  background: var(--honey);
+  animation: write-pulse 1.1s ease infinite;
+}
+
+@keyframes write-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.write-box {
+  margin-top: 10px;
 }
 
 .row {
@@ -1024,9 +1044,6 @@ textarea {
   font-weight: 800;
 }
 
-.fallback {
-  margin-top: 12px;
-}
 
 @media (max-height: 740px) {
   .mascot {
