@@ -76,8 +76,22 @@
   }
 
   function go(screen, extra) {
+    if (screen === "gift") state.codesReady = false;
     Object.assign(state, extra || {}, { screen: screen });
     render();
+  }
+
+  function codeList() {
+    const meta = state.codesMeta || {};
+    const v = meta.v ? String(meta.v) : "";
+    return (Q.codes || []).map((code) => {
+      const image = (code.id && meta[code.id]) || code.image;
+      const sep = image.indexOf("?") >= 0 ? "&" : "?";
+      return {
+        ...code,
+        image: v ? image + sep + "v=" + encodeURIComponent(v) : image,
+      };
+    });
   }
 
   function progressDots() {
@@ -241,7 +255,17 @@
     }
 
     if (state.screen === "gift") {
-      const codes = Q.codes || [];
+      if (!state.codesReady) {
+        fetch("assets/codes-meta.json?t=" + Date.now())
+          .then((res) => (res.ok ? res.json() : {}))
+          .catch(() => ({}))
+          .then((meta) => {
+            state.codesMeta = meta;
+            state.codesReady = true;
+            if (state.screen === "gift") render();
+          });
+      }
+      const codes = codeList();
       app.innerHTML = `
         <section class="screen is-on">
           <div class="progress">${dots}</div>
@@ -656,7 +680,7 @@
   });
 
   function openCode(i) {
-    const code = (Q.codes || [])[i];
+    const code = codeList()[i];
     const box = document.getElementById("lightbox");
     const title = document.getElementById("lightbox-title");
     const img = document.getElementById("lightbox-img");

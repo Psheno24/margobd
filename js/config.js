@@ -14,11 +14,13 @@ window.QUEST = {
   // Положи картинки кодов в assets (png/jpg/webp) — имена ниже
   codes: [
     {
+      id: "ozone",
       title: "Озоновый слой",
       image: "assets/code-ozone.png",
       fileHint: "code-ozone.png",
     },
     {
+      id: "berries",
       title: "Дикие ягодки",
       image: "assets/code-berries.png",
       fileHint: "code-berries.png",
