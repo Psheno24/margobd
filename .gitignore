@@ -2,3 +2,9 @@
 Thumbs.db
 .env
 .env.*
+
+# backup-safe extras
+node_modules/
+*.exe
+*.psd
+target/
